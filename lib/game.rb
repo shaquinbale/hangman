@@ -1,4 +1,5 @@
 require 'set'
+require_relative 'hangman'
 
 class Game
   def initialize(word_list)
@@ -29,74 +30,30 @@ class Game
       input = gets.downcase.chomp
     end
 
+    while @game_state[:letters_guessed].include?(input)
+      puts "You already guessed that letter"
+      input = gets.downcase.chomp
+    end
+
     input
   end
-end
 
-module Hangman
-  HANGMANPICS = [
-  <<~PIC1,
-    +---+
-    |   |
-        |
-        |
-        |
-        |
-    =========
-  PIC1
-  <<~PIC2,
-    +---+
-    |   |
-    O   |
-        |
-        |
-        |
-    =========
-  PIC2
-  <<~PIC3,
-    +---+
-    |   |
-    O   |
-    |   |
-        |
-        |
-    =========
-  PIC3
-  <<~PIC4,
-    +---+
-    |   |
-    O   |
-   /|   |
-        |
-        |
-    =========
-  PIC4
-  <<~PIC5,
-    +---+
-    |   |
-    O   |
-   /|\\  |
-        |
-        |
-    =========
-  PIC5
-  <<~PIC6,
-    +---+
-    |   |
-    O   |
-   /|\\  |
-   /    |
-        |
-    =========
-  PIC6
-  <<~PIC7
-    +---+
-    |   |
-    O   |
-   /|\\  |
-   / \\  |
-        |
-    =========
-  PIC7
-]
+  def update_game(guess)
+    @game_state[letters_guessed].add guess
+  end
+
+  def game_won?
+    
+  end
+
+  def end_game
+    
+  end
+
+  def play_round
+    puts Hangman::HANGMANPICS[@game_state[:guesses]]
+    display_word
+    update_game(get_guess)
+    game_won? ? end_game : play_round
+  end
 end
