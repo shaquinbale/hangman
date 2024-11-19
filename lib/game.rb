@@ -10,20 +10,62 @@ class Game
     }
   end
 
+  def start_game
+    puts "HANGMAN"
+    puts "1) New game"
+    puts "2) Load game"
+    puts "3) Quit game"
+
+    menu_choice = gets.chomp
+    until menu_choice =~ /^[1-3]$/
+      puts "Please choose a valid option"
+      menu_choice = gets.chomp
+    end
+
+    case menu_choice
+    when "1"
+      play_round
+    when "2"
+      load_to_file
+      play_round
+    when "3"
+      puts "Exiting game, goodbye!"
+      return
+    end
+  end
+
+  def save_to_file(filename='save_game.json')
+    File.write(filename, JSON.generate(@game_state))
+  end
+
+  def load_to_file(filename='save_game.json')
+    if File.exist?(filename)
+      data = JSON.parse(File.read(filename))
+      p data[:letters_guessed]
+      p data.values
+      @game_state = data
+    else
+      puts "No save file found. Starting new game \n\n"
+    end
+    
+  end
+
   def display_word
     word = @game_state[:word]
     word_hidden = Array.new(word.length, '_')
 
-    word_hidden.each_with_index do |char, index|
-      word_hidden[index] = word[index] if @game_state[:letters_guessed].include?(word[index])
+    word_hidden = word.chars.map.with_index do |char, index|
+      @game_state[:letters_guessed].include?(char) ? char : '_'
     end
 
     puts word_hidden.join
   end
 
   def get_guess
-    puts "Guess another letter!"
+    puts "Guess another letter or *save* your game"
     input = gets.downcase.chomp
+
+    return input if input == "save"
 
     until input.length == 1 && input =~ /[a-z]/
       puts "Your guess must be one letter"
@@ -40,7 +82,7 @@ class Game
 
   def update_game(guess)
     @game_state[:letters_guessed] << guess
-    @game_state[:guesses] += 1
+    @game_state[:guesses] += 1 unless @game_state[:word].include?(guess)
   end
 
   def check_for_win
@@ -58,10 +100,12 @@ class Game
   def play_round
     puts "Letters guessed: #{@game_state[:letters_guessed].sort.join}"
     puts Hangman::HANGMANPICS[@game_state[:guesses]]
+    display_word
     return game_lost if @game_state[:guesses] >= 6
 
-    display_word
-    update_game(get_guess)
+    guess = get_guess
+    return save_to_file if guess == "save"
+    update_game(guess)
 
     check_for_win ? game_won : play_round
   end
