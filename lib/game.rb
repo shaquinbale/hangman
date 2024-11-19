@@ -4,7 +4,7 @@ class Game
   def initialize(word_list)
       @game_state = {
       word: word_list.sample,
-      letters_guessed: Set.new(['a', 'b', 'c']),
+      letters_guessed: Set.new,
       guesses: 0
     }
   end
@@ -17,7 +17,18 @@ class Game
       word_hidden[index] = word[index] if @game_state[:letters_guessed].include?(word[index])
     end
 
-    puts "the word is #{word}"
-    puts "the hidden word is #{word_hidden}"
+    puts word_hidden
+  end
+
+  def get_guess
+    puts "Guess another letter!"
+    input = gets.downcase.chomp
+
+    until input.length == 1 && input =~ [/a-z/]
+      puts "Your guess must be one letter"
+      input = gets.downcase.chomp
+    end
+
+    input
   end
 end
